@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const symbols = ['🍒', '🍋', '🍊', '🔔', '⭐', '💎'];
 
@@ -11,6 +10,27 @@ function App() {
   const [topUpAmount, setTopUpAmount] = useState('');
   const [winCells, setWinCells] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const handleInteraction = () => {
+      if (!audioRef.current) {
+        const bgAudio = new Audio(import.meta.env.BASE_URL + 'sounds/bg.mp3');
+        bgAudio.loop = true;
+        bgAudio.volume = 0.3;
+        bgAudio.play().catch(() => {});
+        audioRef.current = bgAudio;
+      }
+    };
+    window.addEventListener('click', handleInteraction, { once: true });
+    return () => {
+      window.removeEventListener('click', handleInteraction);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   function generateGrid() {
     return Array(3).fill().map(() =>
@@ -48,7 +68,7 @@ function App() {
           const prize = bet * 5;
           setBalance(prev => prev + prize);
           setWinCells(result.cells);
-          const winSound = new Audio(import.meta.env.BASE_URL + '/sounds/win.mp3');
+          const winSound = new Audio(import.meta.env.BASE_URL + 'sounds/win.mp3');
           winSound.play().catch(() => {});
         }
       }
@@ -58,14 +78,12 @@ function App() {
   const checkWin = (grid) => {
     const winning = [];
 
-    // Horizontal lines only
     for (let i = 0; i < 3; i++) {
       if (grid[i][0] === grid[i][1] && grid[i][1] === grid[i][2]) {
         winning.push([i, 0], [i, 1], [i, 2]);
       }
     }
 
-    // Diagonal lines
     if (grid[0][0] === grid[1][1] && grid[1][1] === grid[2][2]) {
       winning.push([0, 0], [1, 1], [2, 2]);
     }
