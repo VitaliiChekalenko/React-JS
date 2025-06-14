@@ -48,7 +48,7 @@ function App() {
           const prize = bet * 5;
           setBalance(prev => prev + prize);
           setWinCells(result.cells);
-          const winSound = new Audio('/sounds/win.mp3');
+          const winSound = new Audio(import.meta.env.BASE_URL + '/sounds/win.mp3');
           winSound.play().catch(() => {});
         }
       }
